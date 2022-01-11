@@ -8,7 +8,8 @@ main <- function(){
   ##マージする
   master_data <- prep_merge(
     gdp_data_for_merge,
-    pollution_data) 
+    pollution_data) %>% 
+    sort
   
   save_interim(master_data, "master")
 }
@@ -32,7 +33,11 @@ prep_merge <- function(gdp_data, pollution_data){
   return(data_output)
 }
 
-
+sort <- function(data_input){
+  list = c("year","country","population","GDP","gdp_per_cap","pollution_single","pollution_mean","missing_rate")
+  data_output <- data_input %>% 
+    dplyr::select(list)
+}
 
 
 source("01_admin/functions/basics.R")

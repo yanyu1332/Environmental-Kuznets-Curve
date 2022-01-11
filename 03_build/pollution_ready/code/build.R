@@ -44,7 +44,8 @@ interval_data <- function(data_input, interval){
                                    missing = 3)) %>%
     dplyr::left_join(data_summarized, by = "every_5_years") %>% 
     dplyr::select(-c(pollution_original,missing_dummy,every_5_years,country.y)) %>% 
-    dplyr::rename(country = country.x)
+    dplyr::rename(country = country.x) %>% 
+    dplyr::rename(pollution_single = pollution_numeric)
   return(data_output)  
 }
 
