@@ -12,13 +12,8 @@ main <- function(){
 
 interval_data <- function(data_input, interval){
   
-  data_input <- tidy_data #test用
-  interval <- 5
-  
-  ## 1. ５年おきのデータ(例: 1960, 1965, 1970, ...) のみを抽出しなさい
-  data_output <- data_input %>%
-    dplyr::filter(year %% interval == 0) %>% 
-    dplyr::select(-c(pollution_original))
+  # data_input <- tidy_data #test用
+  # interval <- 5
   
   ## 2. ５年の間の年を、より近い年に含めて、平均値を計算しなさい
   data_summarized <- data_input %>%
@@ -30,15 +25,26 @@ interval_data <- function(data_input, interval){
                                    missing = 3)) %>%
     dplyr::mutate(every_5_years = group * interval )%>% 
     dplyr::group_by(every_5_years,country) %>%
-    dplyr::summarise(pollution = mean(pollution_numeric, na.rm = TRUE),
+    dplyr::summarise(pollution_mean = mean(pollution_numeric, na.rm = TRUE),
                      missing_rate = mean(missing_dummy)) %>%
-    dplyr::ungroup() %>% 
-    dplyr::mutate(years = every_5_years / dplyr::if_else(country == "JPN",
-                                                         true = 1,
-                                                         false = 2,
-                                                         missing = 3)) %>% 
-    dplyr::select(-c(every_5_years))
-    
+    dplyr::ungroup() 
+    # dplyr::mutate(years = every_5_years / dplyr::if_else(country == "JPN",
+    #                                                      true = 1,
+    #                                                      false = 2,
+    #                                                      missing = 3)) %>% 
+    # dplyr::select(-c(every_5_years))
+  
+  ## 1. ５年おきのデータ(例: 1960, 1965, 1970, ...) のみを抽出しなさい
+  data_output <- data_input %>%
+    dplyr::filter(year %% interval == 0) %>% 
+    dplyr::mutate(every_5_years = year *
+                    dplyr::if_else(country == "JPN",
+                                   true = 1,
+                                   false = 2,
+                                   missing = 3)) %>%
+    dplyr::left_join(data_summarized, by = "every_5_years") %>% 
+    dplyr::select(-c(pollution_original,missing_dummy,every_5_years,country.y)) %>% 
+    dplyr::rename(country = country.x)
   return(data_output)  
 }
 
