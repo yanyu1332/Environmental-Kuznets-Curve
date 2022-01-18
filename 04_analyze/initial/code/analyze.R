@@ -45,7 +45,7 @@ plot_kuznets_curve <- function(data_input,x_var,y_var,group_var,label_var){
   
   plot_output <- ggplot2::ggplot(data = data_input,mapping = aes(x=!!x_var,y=!!y_var,color = !!group_var,label = !!label_var)) +
     labs(x = "gdp_per_capita", y = "pollution") +
-    ggtitle("Environment Kuzunets Curve for USA sulfur dioxide emmisions") + 
+    ggtitle("Environmental Kuznets Curve for USA and Japan sulfur dioxide emissions") + 
     geom_point(position="identity", size=2, alpha = 0.8) +
     geom_text_repel() +
     geom_line()
