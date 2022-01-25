@@ -2,10 +2,13 @@ main <- function(){
   my_folder <- "initial"
   ##データの読み込み
   data_master <- read_interim("master")
-  main_varnames <- c()
+  main_varnames <- c(population)
   output_folder <- "initial"
   
   #(a)
+  data_master %>% 
+    gen_table %>% 
+    print
   
   #(b)
   data_master %>%  
@@ -21,15 +24,11 @@ main <- function(){
 ## ==============================
 # (a) 記述統計の作成
 ## (1)度数分布表の作成
-gen_quantile <- function(data_input){
-  data_input <- data_master %>% 
-  group_by(data_input, country) %>% 
-  quantile(data_input$gdp_per_cap)
+gen_table <- function(data_input){
+  table_output <- data_input %>% 
+  psych::describeBy(group = "country")
   
-}
-## (2)代表値の作成(mean,median,variance)
-gen_central_tendency <- function(){
-  
+  return(table_output)
 }
 
 ## ==============================
@@ -44,11 +43,13 @@ plot_kuznets_curve <- function(data_input,x_var,y_var,group_var,label_var){
   label_var <- rlang::enquo(label_var)
   
   plot_output <- ggplot2::ggplot(data = data_input,mapping = aes(x=!!x_var,y=!!y_var,color = !!group_var,label = !!label_var)) +
-    labs(x = "gdp_per_capita", y = "pollution") +
-    ggtitle("Environmental Kuznets Curve for USA and Japan sulfur dioxide emissions") + 
+    labs(x = "gdp_per_capita", y = "CO2 pollution") +
+    ggtitle("Environmental Kuznets Curve for USA and Japan CO2 emissions") + 
     geom_point(position="identity", size=2, alpha = 0.8) +
     geom_text_repel() +
     geom_line()
+  
+  gridExtra::grid.arrange(p1, p2, nrow = 1)
   
   return(plot_output)
 }
@@ -69,4 +70,5 @@ source("01_admin/functions/basics.R")
 library(ggplot2)
 library(ggrepel)
 library(dplyr)
+library(psych)
 main()
