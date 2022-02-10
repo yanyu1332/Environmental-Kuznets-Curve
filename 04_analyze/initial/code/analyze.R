@@ -2,13 +2,13 @@ main <- function(){
   my_folder <- "initial"
   ##データの読み込み
   data_master <- read_interim("master")
-  main_varnames <- c(population)
+  #main_varnames <- c(population_mean)
   output_folder <- "initial"
   
   #(a)
   data_master %>% 
     gen_table %>% 
-    print
+    print ##何らかの形式で保存することはできませんでした...
   
   #(b)
   data_master %>%  
@@ -18,17 +18,28 @@ main <- function(){
                        label_var = year) %>% 
   save_my_plot(var_name = "Environmenta Kuznets Curve",
                folder_name = my_folder)
-
+  
+  #(c)
+  data_master %>% 
+    run_regression() %>% 
+    print ##何らかの形式で保存することはできませんでした...
 }
+
+data_master[data_master$country == "JPN"]
 
 ## ==============================
 # (a) 記述統計の作成
 ## (1)度数分布表の作成
 gen_table <- function(data_input){
   table_output <- data_input %>% 
-  psych::describeBy(group = "country")
-  
+  psych::describeBy(group = "country") 
   return(table_output)
+}
+
+save_table <- function(data_input,file_name,folder_name){
+  file <- paste0(file_name, ".png")
+  file_path <- here::here("04_analyze", folder_name,"table", file)
+  save(data_input,file = file_path)
 }
 
 ## ==============================
@@ -48,20 +59,37 @@ plot_kuznets_curve <- function(data_input,x_var,y_var,group_var,label_var){
     geom_point(position="identity", size=2, alpha = 0.8) +
     geom_text_repel() +
     geom_line()
-  
-  gridExtra::grid.arrange(p1, p2, nrow = 1)
+  #library("gridExtra")
+  #gridExtra::grid.arrange(p1, p2, nrow = 1)
   
   return(plot_output)
 }
+
+
 
 ## ==============================
 # (c) 回帰分析
 # 回帰分析で環境クズネッツ曲線の仮説を検証するには、どのような回帰式を推定すればよいですか
 # 回帰分析の結果を表としてまとめ、議論しなさい
 
-plot_regression <- function(){
-  
+run_regression <- function(data_input){
+  summary_list <- list(
+    "linear_regression" = estimatr::lm_robust(
+      pollution_mean ~ gdp_per_cap,
+      clusters = country,
+      se_type = "stata",
+      data = data_input
+    ),
+    "Nonlinear_regression" = estimatr::lm_robust(
+      pollution_mean ~ gdp_per_cap + I(gdp_per_cap^2),
+      clusters = country,
+      se_type = "stata",
+      data = data_input
+    )
+  )
+  return(summary_list)
 }
+
 
 ## ==============================
 
@@ -71,4 +99,5 @@ library(ggplot2)
 library(ggrepel)
 library(dplyr)
 library(psych)
+library(gridExtra)
 main()
