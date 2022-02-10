@@ -80,6 +80,18 @@ run_regression <- function(data_input){
       se_type = "stata",
       data = data_input
     ),
+    "linea_regression_log" = estimatr::lm_robust(
+      pollution_mean ~ I(log(gdp_per_cap)),
+      clusters = country,
+      se_type = "stata",
+      data = data_input
+    ),
+    "Nonlinear_regression_log" = estimatr::lm_robust(
+      pollution_mean ~ I(log(gdp_per_cap)) + I(gdp_per_cap^2),
+      clusters = country,
+      se_type = "stata",
+      data = data_input
+    ),
     "Nonlinear_regression" = estimatr::lm_robust(
       pollution_mean ~ gdp_per_cap + I(gdp_per_cap^2),
       clusters = country,
